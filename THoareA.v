@@ -872,4 +872,15 @@ Proof.
 Defined.  
   
 
+
+Lemma IfTheElse_VHTT1 (P0: W -> Prop) (P1 P2: Value -> W -> Prop) 
+        (fenv: funEnv) (env: valEnv)     
+        (e1 e2 e3: Exp) :
+  THoareTriple_Eval P0 P1 fenv env e1 ->
+  THoareTriple_Eval (P1 (cst bool true)) P2 fenv env e2 ->
+  THoareTriple_Eval (P1 (cst bool false)) P2 fenv env e3 ->
+  THoareTriple_Eval P0 P2 fenv env (IfThenElse e1 e2 e3).
+Proof.
+Admitted.
+
 End THoare.
