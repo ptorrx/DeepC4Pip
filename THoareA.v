@@ -444,7 +444,166 @@ Lemma BStep_convert
   instantiate (1:= extractRunState ftenv tenv fenv e1 t k3 k1 env k2 s).
   eapply EvalIntro.
 *)  
+
+
+Lemma Prms_BStepT1 (ftenv: funTC) (tenv: valTC)
+      (fenv: funEnv) (env: valEnv) 
+      (e: Exp) (es: list Exp) (v: Value) (vs: list Value) (s s': W)
+      (k1: FEnvTyping fenv ftenv)
+      (k2: EnvTyping env tenv) (pt: PTyp)
+      (k3: PrmsTyping ftenv tenv fenv (PS (e::es)) pt) :
+  PrmsClosure fenv env (Conf Prms s (PS (e::es)))
+                       (Conf Prms s' (PS (map Val (v::vs)))) ->
+  (sigT2 (fun s1 : W =>
+            (sigT (fun v1: Value =>
+                     EClosure fenv env (Conf Exp s e) (Conf Exp s1 (Val v1)))))
+         (fun s1 : W =>
+            PrmsClosure fenv env (Conf Prms s1 (PS es))
+                                 (Conf Prms s' (PS (map Val vs))))).
+  intros.
+  inversion k3; subst.
+  inversion X0; subst.
+  rename X1 into Y1.
+  rename X2 into Y3.
+  rename y into t.
+  rename l' into ts.
+  
+  assert (ExpSoundness ftenv tenv fenv e t Y1) as X1.
+  eapply (ExpEval ftenv tenv fenv e t Y1).
+  unfold ExpSoundness in X1.
+  unfold SoundExp in X1.
+  specialize (X1 k1 env k2 s).
+  destruct X1 as [v1 k4 X1].
+  destruct X1 as [s1 X1].
+
+  generalize X1.
+  intro Y4.
+
+  assert (PrmsTyping ftenv tenv fenv (PS es) (PT ts)) as Y2.
+  constructor.
+  auto.
+  
+  assert (PrmsSoundness ftenv tenv fenv (PS es) (PT ts) Y2) as X2.
+  eapply (PrmsEval ftenv tenv fenv (PS es) (PT ts) Y2).
+  unfold PrmsSoundness in X2.
+  unfold SoundPrms in X2.
+  specialize (X2 k1 env k2 s1).
+  destruct X2 as [es1 X2].
+  destruct X2 as [vs1 Y5 X2].
+  destruct X2 as [Y6 X2].
+  destruct X2 as [s2 X2].
+
+  inversion Y5; subst.
+
+(**)
+  assert (PrmsClosure fenv env (Conf Prms s (PS (e :: es)))
+        (Conf Prms s2 (PS (map Val (v1 :: vs1))))).
+  eapply Pars_extended_congruence4.
+  eauto.
+  exact X2.
+  
+  constructor 1 with (x:=s1).
+  constructor 1 with (x:=v1).
+  exact X1.
+
+  assert (s' = s2 /\ vs = vs1).
+  eapply PrmsConfluence in X.
+  specialize (X X3).
+  destruct X.
+  split.
+  exact H.
+  inversion H0; subst.
+  auto.
+  eauto.
+  auto.
+  auto.
+  destruct H.
+  rewrite H.
+  rewrite H0.
+  auto.
+Defined.  
+
+
+
+Lemma Prms_BStepT2 (ftenv: funTC) (tenv: valTC)
+      (fenv: funEnv) (env: valEnv) 
+      (e: Exp) (es: list Exp) (v: Value) (vs: list Value) (s s': W)
+      (k1: FEnvTyping fenv ftenv)
+      (k2: EnvTyping env tenv) (pt: PTyp)
+      (k3: PrmsTyping ftenv tenv fenv (PS (e::es)) pt) :
+  PrmsClosure fenv env (Conf Prms s (PS (e::es)))
+                       (Conf Prms s' (PS (map Val (v::vs)))) ->
+  (sigT2 (fun s1 : W =>
+            (EClosure fenv env (Conf Exp s e) (Conf Exp s1 (Val v))))
+         (fun s1 : W =>
+            PrmsClosure fenv env (Conf Prms s1 (PS es))
+                                 (Conf Prms s' (PS (map Val vs))))).
+  intros.
+  inversion k3; subst.
+  inversion X0; subst.
+  rename X1 into Y1.
+  rename X2 into Y3.
+  rename y into t.
+  rename l' into ts.
+  
+  assert (ExpSoundness ftenv tenv fenv e t Y1) as X1.
+  eapply (ExpEval ftenv tenv fenv e t Y1).
+  unfold ExpSoundness in X1.
+  unfold SoundExp in X1.
+  specialize (X1 k1 env k2 s).
+  destruct X1 as [v1 k4 X1].
+  destruct X1 as [s1 X1].
  
+(*
+  generalize X1.
+  intro Y4.
+*)
+  assert (PrmsTyping ftenv tenv fenv (PS es) (PT ts)) as Y2.
+  constructor.
+  auto.
+  
+  assert (PrmsSoundness ftenv tenv fenv (PS es) (PT ts) Y2) as X2.
+  eapply (PrmsEval ftenv tenv fenv (PS es) (PT ts) Y2).
+  unfold PrmsSoundness in X2.
+  unfold SoundPrms in X2.
+  specialize (X2 k1 env k2 s1).
+  
+  destruct X2 as [es1 X2].
+  destruct X2 as [vs1 Y5 X2].
+  destruct X2 as [Y6 X2].
+  destruct X2 as [s2 X2].
+  inversion Y5; subst.
+
+  assert (PrmsClosure fenv env (Conf Prms s (PS (e :: es)))
+        (Conf Prms s2 (PS (map Val (v1 :: vs1))))).
+  eapply Pars_extended_congruence4.
+  eauto.
+  exact X2.
+  
+  
+  (**)
+  assert (s' = s2 /\ (v::vs) = (v1::vs1)).
+  eapply PrmsConfluence in X.
+  specialize (X X3).
+  exact X.
+
+  eauto.
+  auto.
+  auto.
+  destruct H.
+  injection H0.
+  intros.
+  
+  constructor 1 with (x:=s1).
+  rewrite H2.
+  auto.
+  rewrite H.
+  rewrite H1.
+  auto.
+Defined.  
+
+
+
 (**************************************************************************)
 
 
@@ -535,6 +694,33 @@ Lemma BindN_VHTT1 (P0 P1: W -> Prop) (P2: Value -> W -> Prop)
   eauto.
 Qed.
 
+Lemma BindN_VHTT2 (P0: W -> Prop) (P1 P2: Value -> W -> Prop)
+      (fenv: funEnv) (env: valEnv)
+      (e1 e2: Exp) :
+  THoareTriple_Eval P0 P1 fenv env e1 ->
+  (forall v: Value, THoareTriple_Eval (P1 v) P2 fenv env e2) ->
+  THoareTriple_Eval P0 P2 fenv env (BindN e1 e2) .
+  unfold THoareTriple_Eval.
+  intros.
+  eapply BindN_BStepT1 in X.
+  destruct X as [s1 X].
+  destruct X as [v1 X].
+  inversion k3; subst.
+  eapply (H0 v1 ftenv tenv).
+  auto.
+  auto.
+  eauto.
+  eauto.
+  eapply (H ftenv tenv).
+  auto. 
+  auto.
+  eauto.
+  eauto.
+  auto.
+  eauto.
+  eauto.
+  eauto.
+Qed.
 
  
 Lemma BindS_VHTT1 (P0: W -> Prop) (P1 P2: Value -> W -> Prop)
@@ -649,5 +835,41 @@ Proof.
   auto.
 Qed.
 
+
+
+Lemma Prms_VHTT1 (P0: W -> Prop) (P1: Value -> W -> Prop)
+                  (P2: list Value -> W -> Prop) 
+        (fenv: funEnv) (env: valEnv)     
+        (e: Exp) (es: list Exp) :
+  THoareTriple_Eval P0 P1 fenv env e ->
+  (forall v: Value,
+     THoarePrmsTriple_Eval (P1 v) (fun vs => P2 (v::vs)) fenv env (PS es)) ->
+  THoarePrmsTriple_Eval P0 P2 fenv env (PS (e::es)).
+Proof.
+  unfold THoareTriple_Eval, THoarePrmsTriple_Eval.
+  intros.
+  inversion k3; subst.
+  inversion X0; subst.
+  rename y into t.
+  rename l' into ts.
+  
+  destruct vs.
+  eapply PrmsClos_aux0 in X.
+  simpl in X.
+  intuition.
+
+  eapply Prms_BStepT2 in X.
+  destruct X as [s1 X].
+  specialize (H ftenv tenv k1 k2 t X1 s s1 v X H1).
+  assert (PrmsTyping ftenv tenv fenv (PS es) (PT ts)).
+  constructor.
+  auto.
+  specialize (H0 v ftenv tenv k1 k2 (PT ts) X3 s1 s' vs p H).
+  auto.
+  eauto.
+  eauto.
+  eauto.
+Defined.  
+  
 
 End THoare.
