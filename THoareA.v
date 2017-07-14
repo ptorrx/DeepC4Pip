@@ -603,6 +603,115 @@ Lemma Prms_BStepT2 (ftenv: funTC) (tenv: valTC)
 Defined.  
 
 
+Lemma IfThenElse_BStepT1 (ftenv: funTC) (tenv: valTC)
+      (fenv: funEnv) (env: valEnv) 
+      (e1 e2 e3: Exp) (v: Value) (s s': W)
+      (k1: FEnvTyping fenv ftenv)
+      (k2: EnvTyping env tenv) (t: VTyp)
+      (k3: ExpTyping ftenv tenv fenv (IfThenElse e1 e2 e3) t) :
+  EClosure fenv env (Conf Exp s (IfThenElse e1 e2 e3)) (Conf Exp s' (Val v)) ->
+  sum (sigT2 (fun s1 : W =>
+        EClosure fenv env (Conf Exp s e1) (Conf Exp s1 (Val (cst bool true))))           (fun s1 : W =>
+             (EClosure fenv env (Conf Exp s1 e2) (Conf Exp s' (Val v)))))
+      (sigT2 (fun s1 : W =>
+      EClosure fenv env (Conf Exp s e1) (Conf Exp s1 (Val (cst bool false))))           (fun s1 : W => 
+             (EClosure fenv env (Conf Exp s1 e3) (Conf Exp s' (Val v))))).
+Proof.
+  intros.
+  inversion k3; subst.
+  
+  assert (ExpSoundness ftenv tenv fenv e1 Bool X0) as Y1.
+  eapply (ExpEval ftenv tenv fenv e1 Bool X0).
+  unfold ExpSoundness in Y1.
+  unfold SoundExp in Y1.
+  specialize (Y1 k1 env k2 s).
+
+  assert (ExpSoundness ftenv tenv fenv e2 t X1) as Y2.
+  eapply (ExpEval ftenv tenv fenv e2 t X1).
+  unfold ExpSoundness in Y2.
+  unfold SoundExp in Y2.
+  specialize (Y2 k1 env k2).
+
+  assert (ExpSoundness ftenv tenv fenv e3 t X2) as Y3.
+  eapply (ExpEval ftenv tenv fenv e3 t X2).
+  unfold ExpSoundness in Y3.
+  unfold SoundExp in Y3.
+  specialize (Y3 k1 env k2).
+
+  destruct Y1 as [v1 H1 Y1].
+  destruct Y1 as [s1 Y1].
+  specialize (Y2 s1).
+  specialize (Y3 s1).
+  destruct v1.
+  destruct v0. 
+  inversion H1; subst.
+  simpl in *.
+  subst T.
+  inversion H; subst.
+  clear H2.
+
+  destruct v0.
+
+(**)
+  destruct Y2 as [v2 H2 Y2].
+  destruct Y2 as [s2 Y2].
+  
+  assert (EClosure fenv env (Conf Exp s (IfThenElse e1 e2 e3))
+                   (Conf Exp s2 (Val v2))).  
+  eapply EClosConcat.
+  eapply IfThenElse_extended_congruence.
+  exact Y1.
+  econstructor.
+  econstructor.
+  exact Y2.
+
+  assert (s' = s2 /\ v = v2).
+  eapply (ExpConfluence ftenv tenv fenv (IfThenElse e1 e2 e3) t k3).
+  auto.
+  eauto.
+  exact X.
+  auto.
+  destruct H.
+
+  constructor.
+  econstructor 1 with (x:=s1).
+  auto.
+  rewrite H.
+  rewrite H3.
+  exact Y2.
+
+(**)
+  clear Y2.
+  rename Y3 into Y2.
+  destruct Y2 as [v2 H2 Y2].
+  destruct Y2 as [s2 Y2].
+  
+  assert (EClosure fenv env (Conf Exp s (IfThenElse e1 e2 e3))
+                   (Conf Exp s2 (Val v2))).  
+  eapply EClosConcat.
+  eapply IfThenElse_extended_congruence.
+  exact Y1.
+  econstructor.
+  econstructor.
+  exact Y2.
+
+  assert (s' = s2 /\ v = v2).
+  eapply (ExpConfluence ftenv tenv fenv (IfThenElse e1 e2 e3) t k3).
+  auto.
+  eauto.
+  exact X.
+  auto.
+  destruct H.
+
+  constructor 2.
+  econstructor 1 with (x:=s1).
+  auto.
+  rewrite H.
+  rewrite H3.
+  exact Y2.
+Qed.
+  
+
 
 (**************************************************************************)
 
@@ -872,7 +981,6 @@ Proof.
 Defined.  
   
 
-
 Lemma IfTheElse_VHTT1 (P0: W -> Prop) (P1 P2: Value -> W -> Prop) 
         (fenv: funEnv) (env: valEnv)     
         (e1 e2 e3: Exp) :
@@ -881,6 +989,32 @@ Lemma IfTheElse_VHTT1 (P0: W -> Prop) (P1 P2: Value -> W -> Prop)
   THoareTriple_Eval (P1 (cst bool false)) P2 fenv env e3 ->
   THoareTriple_Eval P0 P2 fenv env (IfThenElse e1 e2 e3).
 Proof.
-Admitted.
+  unfold THoareTriple_Eval.
+  intros.
+  generalize (IfThenElse_BStepT1
+                ftenv tenv fenv env e1 e2 e3 v s s' k1 k2 t k3 X).
+  intro.
+  inversion k3; subst.
+  specialize (H ftenv tenv k1 k2 Bool X1 s).
+  specialize (H0 ftenv tenv k1 k2 t X2).
+  specialize (H1 ftenv tenv k1 k2 t X3).
+  destruct X0.
+
+  destruct s0 as [s1 X0 X4].
+  eapply H0.
+  exact X4.
+  eapply H.
+  exact X0.
+  exact H2.
+
+  destruct s0 as [s1 X0 X4].
+  eapply H1.
+  exact X4.
+  eapply H.
+  exact X0.
+  exact H2.
+Qed.  
+
+   
 
 End THoare.
