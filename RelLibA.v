@@ -292,8 +292,50 @@ Proof.
   assumption.
 Defined.
 
+
+Lemma ExRelValT1 {K V1 V2: Type} {h: DEq K} (R: V1 -> V2 -> Type)
+       (tenv: Envr K V2) (venv: Envr K V1) (x: K) (v: V1): 
+    MatchEnvsT R venv tenv ->
+    findET venv x v ->
+    sigT2 (findET tenv x) (fun t: V2 => R v t). 
+Proof.
+  intros.
+  induction X; subst.
+  inversion X0.
+  inversion H.
+  inversion X0; subst.
+  inversion H; subst.
+  rename v2 into t2.
+  destruct (dEq x k). 
+  inversion H1; subst.
+  econstructor.
+  instantiate (1:= t2).
+  constructor.
+  simpl.
+  destruct (dEq k k).
+  auto.
+  intuition n.
+  assumption.
+  assert (findET ls1 x v).
+  constructor.
+  auto.
+  eapply IHX in X1.
+  destruct X1.
+  econstructor.
+  instantiate (1:= x0).
+  constructor.  
+  simpl.
+  destruct (dEq x k).
+  rewrite e in n.
+  intuition n.
+  inversion f; subst.
+  assumption.
+  assumption.
+Defined.
+
+
 Lemma ExRelValTNone {K V1 V2: Type} {h: DEq K} (R: V1 -> V2 -> Type)
-       (tenv: Envr K V2) (venv: Envr K V1) (x: K) (t: V2): 
+       (tenv: Envr K V2) (venv: Envr K V1) (x: K): (*t: V2:*) 
     MatchEnvsT R venv tenv ->
     findE tenv x = None ->
     findE venv x = None.
@@ -323,6 +365,71 @@ eassumption.
 eassumption.
 assumption.
 Defined.
+
+
+Lemma MatchEnvs2BT_find1 {K V1 V2: Type} {h: DEq K} (rel: V1 -> V2 -> Type)  
+      (k: K) (v1: V1) (v2: V2) (env1: Envr K V1) (env2: Envr K V2)
+  : MatchEnvs2BT rel k v1 v2 env1 env2 -> findET env1 k v1 * findET env2 k v2. 
+  intros.
+  inversion X; subst.
+  assert (findE ls1 k = None).
+  eapply (ExRelValTNone rel ls2 ls1 k).
+  auto.
+  auto.
+  split.
+  eapply findEP2toEP_T.
+  econstructor.
+  reflexivity.
+  auto.
+  eapply findEP2toEP_T.
+  econstructor.
+  reflexivity.
+  assumption.
+Defined.  
+   
+
+Lemma envAppendCompare {K V1 V2: Type} {h: DEq K} (R: V1 -> V2 -> Type)
+          (env1 env2 env3 env4: Envr K V1)
+          (tenv1 tenv3: Envr K V2) 
+          (x: K) (f1 f2: V1) :
+  MatchEnvsT R env1 tenv1 ->
+  MatchEnvsT R env3 tenv3 ->
+  findE tenv1 x = None ->
+  findE tenv3 x = None ->
+  env1 ++ (x,f1) :: env2 = env3 ++ (x,f2) :: env4 ->
+  f1 = f2.
+Proof.
+    intros.
+    assert (findE env1 x = None).
+    eapply (ExRelValTNone R tenv1 env1).
+    assumption.
+    assumption.
+    assert (findE env3 x = None).
+    eapply (ExRelValTNone R).
+    eassumption.
+    assumption.
+    assert (findE (env1 ++ (x, f1) :: env2) x =
+            Some f1).
+    erewrite override_simpl2.
+    simpl.
+    destruct (dEq x x).
+    auto.
+    intuition.
+    auto.
+    assert (findE (env3 ++ (x, f2) :: env4) x =
+            Some f2).
+    erewrite override_simpl2.
+    simpl.
+    destruct (dEq x x).
+    auto.
+    intuition.
+    auto.
+    rewrite <- H1 in H5.
+    rewrite H4 in H5.
+    injection H5.
+    auto.
+Defined.    
+ 
 
 (***********************************************************************)
 

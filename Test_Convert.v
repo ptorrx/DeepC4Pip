@@ -546,6 +546,26 @@ Lemma expTypingTestDAppA (ftenv: funTC) (tenv: valTC) (fenv: funEnv)
 Defined.  
 
 
+(*
+Definition succIndexInternal (idx: index) : Exp :=
+  BindS i (extract1 idx) (BindS P (extract2 idx))
+        (IfThenElse (Lt_dec i) (apply DSome 
+                                   (Apply IndexSucc (Var i))) DNone) .
+*)
+
+(*
+Definition plusR_X (n:nat) := QF (FC emptyE [("i",Nat)]
+       (VLift (Var "i"))
+       (SuccR_X (Apply (FVar "plusR") (PS [VLift (Var "i")])))
+       "plusR" n).
+
+Definition plusX := FC emptyE [("i",Nat),("j",Nat)]
+    (Val 0)
+    (IfThenElse (EEqual 0 "j")
+                (VLift (Var "i"))
+                (Apply (FVar "plusR") (PS [VLift (Var "i"), PredR "j"]))).
+*)
+
 End Convert2.
 
 (*

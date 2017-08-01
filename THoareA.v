@@ -713,6 +713,207 @@ Qed.
   
 
 
+Lemma Apply_BStepT2
+      (ftenv: funTC) (tenv: valTC)
+      (fenv: funEnv) (env: valEnv)
+      (f: Fun) (es: list Exp) (v: Value) (s s': W) 
+      (k1: FEnvTyping fenv ftenv)
+      (k2: EnvTyping env tenv) (t: VTyp)
+      (k3: ExpTyping ftenv tenv fenv (Apply (QF f) (PS es)) t) :
+  EClosure fenv env (Conf Exp s (Apply (QF f) (PS es)))
+                                (Conf Exp s' (Val v)) ->
+  sigT (fun s1 : W =>
+          (sigT2 (fun vs: list Value =>   
+               PrmsClosure fenv env (Conf Prms s (PS es))
+                                    (Conf Prms s1 (PS (map Val vs))))
+            (fun vs : list Value =>
+               EClosure fenv env (Conf Exp s1 (Apply (QF f)
+                                                  (PS (map Val vs))))
+                                 (Conf Exp s' (Val v))))).
+Proof.
+  intros.
+  inversion k3; subst.
+  rename X1 into Y2.
+  rename X2 into Y1.
+  
+  assert (PrmsSoundness ftenv tenv fenv (PS es) (PT (map snd fps)) Y1) as X1.
+  eapply (PrmsEval ftenv tenv fenv (PS es) (PT (map snd fps)) Y1).
+  unfold PrmsSoundness in X1.
+  unfold SoundPrms in X1.
+  specialize (X1 k1 env k2 s).
+  destruct X1 as [es1 X1].
+  destruct X1 as [vs k4 X1].
+  destruct X1 as [k5 X1].
+  destruct X1 as [s1 X1].
+   
+  generalize X1.
+  intro.
+
+  eapply Apply1_extended_congruence with (f:=f) in X1.
+  
+  econstructor 1 with (x:=s1).
+  
+  inversion k4; subst.
+
+  econstructor 1 with (x:=vs).
+  auto.
+
+  assert (ExpTyping ftenv tenv fenv (Apply (QF f) (PS (map Val vs))) t).
+  econstructor.
+  reflexivity.
+  auto.
+  eauto.
+  eapply weakenPrmsTyping in k5.
+  instantiate (1:=fenv) in k5.
+  instantiate (1:=tenv) in k5.
+  instantiate (1:=ftenv) in k5.
+  simpl in k5.
+  auto.
+  constructor.
+  auto.
+
+  set (Apply (QF f) (PS (map Val vs))) as e.
+
+  assert (ExpSoundness ftenv tenv fenv e t X3) as X6.
+  eapply (ExpEval ftenv tenv fenv e t X3).
+  unfold ExpSoundness in X6.
+  unfold SoundExp in X6.
+  specialize (X6 X0 env k2 s1).
+  destruct X6 as [v2 H0 X6].
+  destruct X6 as [s2 X6].
+
+  assert (EClosure fenv env (Conf Exp s (Apply (QF f) (PS es)))
+                   (Conf Exp s2 (Val v2))).
+  eapply EClosConcat.
+  exact X1.
+  auto.
+
+  assert (s' = s2 /\ v = v2).
+  eapply ExpConfluence.
+  exact k3.
+  auto.
+  eauto.
+  eauto.
+  auto.
+  destruct H.
+  rewrite H.
+  rewrite H1.
+  auto.
+Qed.
+  
+
+Lemma Apply_BStepT2t
+      (ftenv: funTC) (tenv: valTC)
+      (fenv: funEnv) (env: valEnv)
+      (f: Fun) (es: list Exp) (v: Value) (s s': W) 
+      (k1: FEnvTyping fenv ftenv)
+      (k2: EnvTyping env tenv) (t: VTyp) (pt: PTyp)
+      (k3: ExpTyping ftenv tenv fenv (Apply (QF f) (PS es)) t)
+      (k0: PrmsTyping ftenv tenv fenv (PS es) pt) :
+  EClosure fenv env (Conf Exp s (Apply (QF f) (PS es)))
+                                (Conf Exp s' (Val v)) ->
+  sigT (fun s1 : W =>
+          (sigT2 (fun vs: list Value =>
+               (PrmsTyping ftenv tenv fenv (PS (map Val vs)) pt *       
+               PrmsClosure fenv env (Conf Prms s (PS es))
+                                    (Conf Prms s1 (PS (map Val vs))))%type)
+            (fun vs : list Value =>
+               EClosure fenv env (Conf Exp s1 (Apply (QF f)
+                                                  (PS (map Val vs))))
+                                 (Conf Exp s' (Val v))))).
+Proof.
+  intros.
+  inversion k3; subst.
+  rename X1 into Y2.
+  rename X2 into Y1.
+  
+  assert (PrmsSoundness ftenv tenv fenv (PS es) (PT (map snd fps)) Y1) as X1.
+  eapply (PrmsEval ftenv tenv fenv (PS es) (PT (map snd fps)) Y1).
+  unfold PrmsSoundness in X1.
+  unfold SoundPrms in X1.
+  specialize (X1 k1 env k2 s).
+  destruct X1 as [es1 X1].
+  destruct X1 as [vs k4 X1].
+  destruct X1 as [k5 X1].
+  destruct X1 as [s1 X1].
+   
+  generalize X1.
+  intro.
+
+  eapply Apply1_extended_congruence with (f:=f) in X1.
+  
+  econstructor 1 with (x:=s1).
+  
+  inversion k4; subst.
+
+  econstructor 1 with (x:=vs).
+  split.
+  
+  assert (pt = PT (map snd fps)).
+  eapply PrmsStrongTyping.
+  exact k0.
+  auto.
+  eauto.
+  auto.
+  rewrite H.
+  auto.
+
+  eapply weakenPrmsTyping in k5.
+  instantiate (1:=fenv) in k5.
+  instantiate (1:=tenv) in k5.
+  instantiate (1:=ftenv) in k5.
+  simpl in k5.
+  auto.
+  constructor.
+  auto.
+
+  exact X2.
+    
+  assert (ExpTyping ftenv tenv fenv (Apply (QF f) (PS (map Val vs))) t).
+  econstructor.
+  reflexivity.
+  auto.
+  eauto.
+  eapply weakenPrmsTyping in k5.
+  instantiate (1:=fenv) in k5.
+  instantiate (1:=tenv) in k5.
+  instantiate (1:=ftenv) in k5.
+  simpl in k5.
+  auto.
+  constructor.
+  auto.
+
+  set (Apply (QF f) (PS (map Val vs))) as e.
+
+  assert (ExpSoundness ftenv tenv fenv e t X3) as X6.
+  eapply (ExpEval ftenv tenv fenv e t X3).
+  unfold ExpSoundness in X6.
+  unfold SoundExp in X6.
+  specialize (X6 X0 env k2 s1).
+  destruct X6 as [v2 H0 X6].
+  destruct X6 as [s2 X6].
+
+  assert (EClosure fenv env (Conf Exp s (Apply (QF f) (PS es)))
+                   (Conf Exp s2 (Val v2))).
+  eapply EClosConcat.
+  exact X1.
+  auto.
+
+  assert (s' = s2 /\ v = v2).
+  eapply ExpConfluence.
+  exact k3.
+  auto.
+  eauto.
+  eauto.
+  auto.
+  destruct H.
+  rewrite H.
+  rewrite H1.
+  auto.
+Qed.
+  
+
+
 (**************************************************************************)
 
 
@@ -743,6 +944,64 @@ Definition THoarePrmsTriple_Eval
     PrmsClosure fenv env (Conf Prms s ps) (Conf Prms s'
                                                (PS (map Val vs))) ->
     P s -> Q vs s'.
+
+Inductive QFClosure :
+     funEnv -> AConfig QFun -> AConfig QFun -> Type :=
+  | QFC_Base : forall (fenv: funEnv) (p: AConfig QFun), 
+              QFClosure fenv p p 
+  | QFC_Step : forall (fenv: funEnv) (p1 p2: AConfig QFun),
+           QFStep fenv p1 p2 ->
+           QFClosure fenv p1 p2.
+
+
+Definition THoareFunTripleA_Eval
+      (P: W -> Prop) (Q: Value -> W -> Prop)  
+      (fenv: funEnv) 
+      (qf: QFun) : Prop := 
+  forall (ftenv: funTC) 
+         (k1: FEnvTyping fenv ftenv)
+         (ft: FTyp)
+         (k2: QFunTyping ftenv fenv qf ft)
+         (s s': W) (f: Fun),
+  QFClosure fenv (Conf QFun s qf) (Conf QFun s' (QF f)) -> 
+  match f with
+    | FC fenv' tenv' e0 e1 x n =>
+      forall vs: list Value,
+        let env' := mkVEnv tenv' vs in        
+        EnvTyping env' tenv' ->   
+    match n with
+      | 0 =>        
+        THoareTriple_Eval P Q fenv' (mkVEnv tenv' vs) e0
+      | S n' =>        
+        THoareTriple_Eval P Q ((x,FC fenv' tenv' e0 e1 x n')::fenv')
+                           (mkVEnv tenv' vs) e1
+    end
+  end.
+
+
+Definition THoareFunTriple_Eval
+      (P: W -> Prop) (Q: Value -> W -> Prop)  
+      (fenv: funEnv) (env: valEnv)
+      (qf: QFun) : Prop := 
+  forall (ftenv: funTC) 
+         (k1: FEnvTyping fenv ftenv)
+         (ft: FTyp)
+         (k2: QFunTyping ftenv fenv qf ft)
+         (s s': W) (f: Fun),
+  QFClosure fenv (Conf QFun s qf) (Conf QFun s' (QF f)) -> 
+  match f with
+    | FC fenv' tenv' e0 e1 x n =>  
+    EnvTyping env tenv' ->   
+    match n with
+      | 0 =>        
+        THoareTriple_Eval P Q fenv' env e0
+      | S n' =>        
+        THoareTriple_Eval P Q ((x,FC fenv' tenv' e0 e1 x n')::fenv')
+                           env e1
+    end
+  end.
+
+(***********************************************************************)
 
 
 Definition IHoareTriple_Eval
@@ -775,6 +1034,17 @@ Definition IHoarePrmsTriple_Eval
 
 (*************************************************************************)
 
+(*
+Lemma THoare_weaken (P : W -> Prop) (Q : Value -> W -> Prop)
+           (fenv fenv': funEnv) (env env': valEnv)
+           (e: Exp) :  
+  THoareTriple_Eval P Q (fenv++fenv') (env++env') e ->
+  THoareTriple_Eval P Q fenv env e.
+  unfold THoareTriple_Eval.
+  intros.
+*)  
+  
+
 Lemma BindN_VHTT1 (P0 P1: W -> Prop) (P2: Value -> W -> Prop)
       (fenv: funEnv) (env: valEnv)
       (e1 e2: Exp) :
@@ -802,6 +1072,8 @@ Lemma BindN_VHTT1 (P0 P1: W -> Prop) (P2: Value -> W -> Prop)
   eauto.
   eauto.
 Qed.
+
+
 
 Lemma BindN_VHTT2 (P0: W -> Prop) (P1 P2: Value -> W -> Prop)
       (fenv: funEnv) (env: valEnv)
@@ -946,6 +1218,128 @@ Qed.
 
 
 
+Lemma Apply_VHTT2 (P0: W -> Prop) (P1: list Value -> W -> Prop)
+                 (P2: Value -> W -> Prop)
+                 (fenv: funEnv) (env: valEnv) (f: Fun) (es: list Exp) :
+   THoarePrmsTriple_Eval P0 P1 fenv env (PS es) ->
+   (forall vs,  
+       THoareTriple_Eval (P1 vs) P2 fenv env
+                                 (Apply (QF f) (PS (map Val vs)))) ->
+   THoareTriple_Eval P0 P2 fenv env (Apply (QF f) (PS es)).
+Proof.
+  unfold THoareTriple_Eval, THoarePrmsTriple_Eval.
+  intros.
+  
+  inversion k3; subst.
+  generalize (Apply_BStepT2t ftenv tenv fenv env f es v s s' k1 k2 t
+                             (PT (map snd fps)) k3 X2).
+  intro P.
+
+  specialize (P X).
+  destruct P as [s1 P].
+  destruct P as [vs P].
+  inversion k3; subst.
+  destruct P as [Q1 Q2].
+
+  specialize (H ftenv tenv k1 k2 (PT (map snd fps)) X2 s s1 vs Q2 H1).
+  assert (ExpTyping ftenv tenv fenv (Apply (QF f) (PS (map Val vs))) t).
+  econstructor.
+  reflexivity.
+  auto.
+  eauto.
+
+  assert (FT fps t = FT fps0 t). 
+  eapply QFunStrongTyping.
+  eauto.
+  auto.
+  eauto.
+  auto.
+  inversion H2; subst.
+  auto.
+  
+  eapply H0.
+  eauto.
+  eauto.
+  eauto.
+  eauto.
+  auto.
+Qed.
+
+
+
+Lemma QFun_VHTT (P1: W -> Prop) (P2: Value -> W -> Prop)
+      (fenv: funEnv) (env: valEnv) (x: Id) (f: Fun) (es: list Exp) :  
+  findET fenv x f ->
+  THoareTriple_Eval P1 P2 fenv env (Apply (QF f) (PS es))  ->
+  THoareTriple_Eval P1 P2 fenv env (Apply (FVar x) (PS es)).
+Proof.  
+  unfold THoareTriple_Eval.
+  intros.
+  assert (sigT2 (findET ftenv x) (fun t: FTyp => FunTyping f t)).
+  {- eapply ExRelValT1.
+     eassumption.
+     assumption.
+  }  
+  destruct X1 as [ft Z1 Z2].
+  inversion k3; subst.  
+  inversion X2; subst.
+
+  eapply MatchEnvs2BT_find1 in X4.
+  destruct X4 as [Z3 Z4].
+
+  destruct ft.
+  inversion Z1; subst.
+  inversion Z4; subst.
+  rewrite H1 in H2.
+  inversion H2; subst.
+  
+  eapply H.
+  - exact k1.
+  - exact k2.
+  - instantiate (1:=t).
+    econstructor.
+    + reflexivity.
+    + assumption.
+    + instantiate (1:=fps).
+      econstructor.
+      auto.
+    + auto.
+
+  - clear H2.
+    instantiate (1:=s).
+    inversion X0; subst.
+    inversion X4; subst.
+    inversion X6; subst.
+    inversion X7; subst.
+    inversion X; subst. 
+    rewrite H2 in H3.
+    inversion H3; subst.
+    auto.
+  - auto.
+Qed.  
+
+
+Lemma Apply_VHTT3 (P0: W -> Prop) (P1: list Value -> W -> Prop)
+                 (P2: Value -> W -> Prop)
+                 (fenv: funEnv) (env: valEnv) (x: Id) (f: Fun)
+                 (es: list Exp) :
+   THoarePrmsTriple_Eval P0 P1 fenv env (PS es) ->
+   findET fenv x f->
+   (forall vs ,
+       THoareTriple_Eval (P1 vs) P2 fenv env
+                         (Apply (QF f) (PS (map Val vs))))  -> 
+   THoareTriple_Eval P0 P2 fenv env (Apply (FVar x) (PS es)).
+Proof.
+   intros.  
+   eapply QFun_VHTT.
+   eauto.
+   eapply Apply_VHTT2.
+   eauto.
+   auto.
+Qed.
+
+
+
 Lemma Prms_VHTT1 (P0: W -> Prop) (P1: Value -> W -> Prop)
                   (P2: list Value -> W -> Prop) 
         (fenv: funEnv) (env: valEnv)     
@@ -1015,6 +1409,5 @@ Proof.
   exact H2.
 Qed.  
 
-   
 
 End THoare.

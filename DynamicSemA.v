@@ -245,6 +245,7 @@ Inductive RTClosure :
            PStep env p1 p2 -> RTClosure env p2 p3 ->
            RTClosure env p1 p3.
 
+
 (******************************************************************)
 
 (** a small step is a big step *)

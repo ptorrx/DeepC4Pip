@@ -168,7 +168,7 @@ eapply ExpSRed_rect.
   inversion H3; subst.
   exact p0.
   intuition n.
-  exact ft.
+  (* exact ft. *)
   eassumption.
 
  (** Par_E *)
@@ -531,7 +531,7 @@ eapply PrmsSRed_rect.
   inversion H3; subst.
   exact p0.
   intuition n.
-  exact ft.
+  (* exact ft. *)
   eassumption.
 
  (** Par_E *)

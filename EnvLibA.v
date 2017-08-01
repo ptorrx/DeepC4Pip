@@ -354,6 +354,44 @@ intros.
 reflexivity.
 Defined.
 
+
+Lemma findE_Some {K V: Type} {h: DEq K} (ls: Envr K V) (x: K) (v: V) :
+           findE ls x = Some v ->
+                   exists ls1 ls2, findE ls1 x = None /\
+                                   ls = ls1 ++ ((x,v) :: ls2).  
+Proof.
+  intros.
+  induction ls.
+  simpl in H.
+  inversion H.
+  inversion H; subst.
+  destruct a.
+  destruct (dEq x k) in H1.
+  inversion H1; subst.
+  exists nil.
+  exists ls.
+  split.
+  simpl.
+  auto.
+  simpl.
+  auto.
+  specialize (IHls H1).
+  destruct IHls as [ls1 H0].
+  destruct H0 as [ls2 H0].
+  destruct H0.
+  exists ((k,v0)::ls1).
+  exists ls2.
+  split.
+  simpl.
+  destruct (dEq x k).
+  intuition.
+  auto.
+  simpl.
+  rewrite <- H2.
+  auto.
+Defined.  
+
+
 (**************************************************************************)
 
 (** lemmas on findEP and findEP2 *)
@@ -581,7 +619,5 @@ Proof.
   rewrite <- H1.
   auto.
 Defined.  
-
-
 
 

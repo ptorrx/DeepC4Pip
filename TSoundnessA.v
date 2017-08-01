@@ -216,7 +216,7 @@ eapply ExpTypingSound_rect.
       destruct (IdT.IdEqDec x x).
       {- auto. }
       {- intuition n. }
-    * apply (FT prs_type ret_type).
+    (* * apply (FT prs_type ret_type). *)
     * eassumption.  
 (** Par_E *)
 -  (* modify *)
@@ -487,7 +487,7 @@ eapply ExpTypingSound_rect.
                 assert (findE ls1 x = None).
                 eapply ExRelValTNone in H.
                 exact H.
-                exact (FT fps t).
+                (* exact (FT fps t). *)
                 exact X1.           
                 inversion H1; subst.
                 inversion X3; subst.
@@ -753,7 +753,7 @@ eapply FunTypingSound_rect.
       destruct (IdT.IdEqDec x x).
       {- auto. }
       {- intuition n. }
-    * apply (FT prs_type ret_type).
+    (* apply (FT prs_type ret_type). *)
     * eassumption.  
 (** Par_E *)
 -  (* modify *)
@@ -1024,7 +1024,7 @@ eapply FunTypingSound_rect.
                 assert (findE ls1 x = None).
                 eapply ExRelValTNone in H.
                 exact H.
-                exact (FT fps t).
+                (* exact (FT fps t).*)
                 exact X1.           
                 inversion H1; subst.
                 inversion X3; subst.
@@ -1293,7 +1293,7 @@ eapply QFunTypingSound_rect.
       destruct (IdT.IdEqDec x x).
       {- auto. }
       {- intuition n. }
-    * apply (FT prs_type ret_type).
+    (* apply (FT prs_type ret_type). *)
     * eassumption.  
 (** Par_E *)
 -  (* modify *)
@@ -1564,7 +1564,7 @@ eapply QFunTypingSound_rect.
                 assert (findE ls1 x = None).
                 eapply ExRelValTNone in H.
                 exact H.
-                exact (FT fps t).
+                (* exact (FT fps t). *)
                 exact X1.           
                 inversion H1; subst.
                 inversion X3; subst.
@@ -1833,7 +1833,7 @@ eapply PrmsTypingSound_rect.
       destruct (IdT.IdEqDec x x).
       {- auto. }
       {- intuition n. }
-    * apply (FT prs_type ret_type).
+    (* apply (FT prs_type ret_type). *)
     * eassumption.  
 (** Par_E *)
 -  (* modify *)
@@ -2104,7 +2104,7 @@ eapply PrmsTypingSound_rect.
                 assert (findE ls1 x = None).
                 eapply ExRelValTNone in H.
                 exact H.
-                exact (FT fps t).
+                (* exact (FT fps t).*)
                 exact X1.           
                 inversion H1; subst.
                 inversion X3; subst.
