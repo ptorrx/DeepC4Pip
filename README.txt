@@ -1,18 +1,20 @@
 
 This project contains the development of DEC (a Deep Embedding of a
 terminating C-style language with effects) as a domain-specific
-language embedded in Gallina.
+language embedded in Gallina, including language definition and
+semantic boilerplate.
 
 Relying on Coq modules, the definition of DEC is parametric in the
 type of the mutable state and in the type of identifiers, which are
 both specified in a module type (IdModType.v).
 
 The syntax of DEC, defined in terms of inductive datatypes (in
-StaticSemA.v, together with its static seamantics), allows for
+StaticSemA.v, together with its static semantics), allows for
 sequencing, local variables (let-style bindings), conditional
 expressions, function call, and generic effects. The construct for
 generic effects allows for the import in DEC of Gallina functions that
-can access and modify the state.
+can access and modify the state (in this sense, DEC could also be
+considered as a syntactic extension of Gallina).
 
 DEC functions can be defined by bounded primitive recursion, using an
 iteration scheme. They are not treated as first-class objects
@@ -53,7 +55,7 @@ term of that category and a state of the store. In general, the
 transition relation depends on a value environment and on a function
 environment.
 
-DEC has the following properties:
+DEC has the following language properties:
 
 1) it satisfies type soundness (no well-typed program gets stuck on a
 non-value, and when a well-typed program terminates it gives a value
@@ -73,14 +75,22 @@ just one possible step).
 5) it is a strongly typed language (each program has at most one
 type).
 
-These results have been proven: 1 and 2 together in a strong type
-soundness theorem (in TSoundnessA.v); 3 (in SReducA.v); 4 (in
-DetermA.v); 5 (in STypingA.v). All the proofs are essentially by
+These results have been proven: 1 and 2 together as a strong type
+soundness theorem (in TSoundnessA.v), 3 (in SReducA.v), 4 (in
+DetermA.v), and 5 (in STypingA.v). All the proofs are essentially by
 mutual induction on the typing relation, using a defined mutual
 induction principle (in TRInductA.v).
 
-DEC supports Hoare logic reasoning (HoareA.v and THoareA.v contain
-Hoare logic rules).
+The type soundness theorem, which has been proved constructively,
+allows in principle the extraction of the return value and the final
+state for each execution of a program, hence providing an interpreter
+for the SOS specification. The determinism proof makes these specified
+values formally available without actually computing them.
+
+DEC supports Hoare logic reasoning, providing valid Hoare logic rules
+in an untyped form (in HoareA.v) and in a typed one (in
+THoareA.v). The proofs of the auxiliary lemmas (in InvertA.v) used in
+the logic proofs make use of all of the 1--5 properties.
 
 DEC has been developed by Paolo Torrini as intermediate language for
 the translation of Pip to C, and it is currently used by a translator
