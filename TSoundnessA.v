@@ -14,7 +14,6 @@ Require Import StaticSemA.
 Require Import DynamicSemA.
 Require Import TRInductA.
 Require Import WeakenA.
-Require Import InvertA.
 
 Require Import IdModTypeA.
 
@@ -30,8 +29,8 @@ Definition Loc_PI := IdT.Loc_PI.
 Definition BInit := IdT.BInit.
 Definition WP := IdT.WP.
 
-Module InvertI := Invert IdT.
-Export InvertI.
+Module WeakenI := Weaken IdT.
+Export WeakenI.
 
 (** type soundness *)
 

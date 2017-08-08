@@ -16,6 +16,7 @@ Require Import WeakenA.
 Require Import TSoundnessA.
 Require Import IdModTypeA.
 Require Import DetermA.
+Require Import STypingA.
 
 Module Abbrev (IdT: IdModType) <: IdModType.
 
@@ -27,8 +28,8 @@ Definition Loc_PI := IdT.Loc_PI.
 Definition BInit := IdT.BInit.
 Definition WP := IdT.WP.
 
-Module Determ := Determ IdT.
-Export Determ.
+Module STypingI := STyping IdT.
+Export STypingI.
 
 Open Scope string_scope.
 Import ListNotations.

@@ -19,6 +19,7 @@ Require Import TSoundnessA.
 Require Import IdModTypeA.
 Require Import DetermA.
 Require Import AbbrevA.
+Require Import InvertA.
 
 Module Hoare (IdT: IdModType) <: IdModType.
 
@@ -30,8 +31,8 @@ Definition Loc_PI := IdT.Loc_PI.
 Definition BInit := IdT.BInit.
 Definition WP := IdT.WP.
 
-Module Abbrev := Abbrev IdT.
-Export Abbrev.
+Module InvertI := Invert IdT.
+Export InvertI.
 
 Open Scope string_scope.
 Import ListNotations.
